@@ -6,31 +6,32 @@ using UnityEngine;
 
 public class GameObjectParser : MonoBehaviour
 {
-    [SerializeField] private Transform parentObject;
-    private Objects GO = new Objects();
+    public Transform parentObject;
+    [HideInInspector] public Objects GO;
     private string saveFile;
     private string json;
     void Awake()
     {
-        saveFile = Application.dataPath + "/hirarchyData.json";
+        // GO  ;
+        // saveFile = Application.dataPath + "/HirarchyData.json";
     }
     void Start()
     {
-        Parser(parentObject);
-        ConvertToObject(parentObject);
-        File.WriteAllText(saveFile, json);
+        GO = new Objects();
+        // Parse(parentObject);
+        // ConvertToJSON(GO);
     }
 
-    private void Parser(Transform obj)
+    public void Parse(Transform obj)
     {
         for(int i = 0; i < obj.childCount; i++)
         {
-            Debug.Log(obj.GetChild(i).name);
+            // Debug.Log(obj.GetChild(i).name);
             FillData(obj.GetChild(i));
             
             if(obj.GetChild(i).childCount != 0)
             {
-                Parser(obj.GetChild(i));
+                Parse(obj.GetChild(i));
             }
         }
     }
@@ -41,16 +42,34 @@ public class GameObjectParser : MonoBehaviour
         myObj.name = obj.name;
         myObj.parent = obj.parent.name;
         myObj.data.position = obj.position;
-        myObj.data.rotation = obj.rotation;
+        myObj.data.rotation = obj.rotation.eulerAngles;
         myObj.data.scale = obj.localScale;
 
         GO.objects.Add(myObj);
     }
 
-    private void ConvertToObject(Transform obj)
+    public void ConvertToJSON(Objects go)
     {
-        json = JsonUtility.ToJson(GO);
+        saveFile = Application.dataPath + "/HirarchyData.json";
+        json = JsonUtility.ToJson(go);
+        File.WriteAllText(saveFile, json);
         Debug.Log(json);
+    }
+
+    [ContextMenu("RUN")]
+    public void LoadData()
+    {   
+        string filePath = Application.dataPath + "/HirarchyData.json";
+        if(File.Exists(filePath))
+        {
+            string jsonText = File.ReadAllText(filePath);
+            GO = JsonUtility.FromJson<Objects>(jsonText);
+            Debug.Log(GO.objects[0].parent);
+        }
+        else
+        {
+            Debug.Log("File not fount");
+        }
     }
 }
 
@@ -70,7 +89,7 @@ public class GameObjectInfo
 public class GameObjectData
 {
     public Vector3 position;
-    public Quaternion rotation;
+    public Vector3 rotation;
     public Vector3 scale;
 
 }
