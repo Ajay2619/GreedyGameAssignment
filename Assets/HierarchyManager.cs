@@ -7,26 +7,19 @@ using UnityEngine;
 public class HierarchyManager : MonoBehaviour
 {
     public Transform parentObject;
-    [HideInInspector] public Objects GO;
+    [HideInInspector] public ObjectTemplets templets;
     private string saveFile;
     private string json;
     public string filePath = "/HierarchyData";
 
-    void Awake()
-    {
-        // GO  ;
-        // saveFile = Application.dataPath + "/HirarchyData.json";
-    }
     void Start()
     {
-        GO = new Objects();
-        // Parse(parentObject);
-        // ConvertToJSON(GO);
+        templets = new ObjectTemplets();
     }
 
     public void ReadHierarchy(Transform parent)
     {
-        GO = new Objects();
+        templets = new ObjectTemplets();
         FillData(parent);
         Parse(parent);
     }
@@ -34,7 +27,6 @@ public class HierarchyManager : MonoBehaviour
     {
         for(int i = 0; i < parent.childCount; i++)
         {
-            // Debug.Log(parent.GetChild(i).name);
             FillData(parent.GetChild(i));
             
             if(parent.GetChild(i).childCount != 0)
@@ -53,13 +45,13 @@ public class HierarchyManager : MonoBehaviour
         myObj.data.rotation = obj.localRotation;
         myObj.data.scale = obj.localScale;
 
-        GO.objects.Add(myObj);
+        templets.objects.Add(myObj);
     }
 
-    public void SaveToJSON(Objects go, string path)
+    public void SaveToJSON(ObjectTemplets templets, string path)
     {
         saveFile = Application.dataPath + path;
-        json = JsonUtility.ToJson(go);
+        json = JsonUtility.ToJson(templets);
         File.WriteAllText(saveFile, json);
         Debug.Log(json);
     }
@@ -68,21 +60,21 @@ public class HierarchyManager : MonoBehaviour
     Transform[] transformsHiererchy;
     public void LoadData(string path)
     {   
-        GO = new Objects();
+        templets = new ObjectTemplets();
         index = 0;
         
         string filePath = Application.dataPath + path;
         if(File.Exists(filePath))
         {
             string jsonText = File.ReadAllText(filePath);
-            GO = JsonUtility.FromJson<Objects>(jsonText);
-            transformsHiererchy = new Transform[GO.objects.Count];
-            Debug.Log(GO.objects.Count);
+            templets = JsonUtility.FromJson<ObjectTemplets>(jsonText);
+            transformsHiererchy = new Transform[templets.objects.Count];
+            Debug.Log(templets.objects.Count);
             Debug.Log(transformsHiererchy.Length);
-            transformsHiererchy[index] = parentObject = new GameObject(GO.objects[0].name).transform;
+            transformsHiererchy[index] = parentObject = new GameObject(templets.objects[0].name).transform;
             SetData(index);
             Debug.Log(index);
-            InstantiateObjects(GO.objects[index].childCount, transformsHiererchy[index]);
+            InstantiateObjects(templets.objects[index].childCount, transformsHiererchy[index]);
         }
         else
         {
@@ -95,29 +87,29 @@ public class HierarchyManager : MonoBehaviour
         for(int i = 1; i <= childCount; i++)
         {
             index++;
-            transformsHiererchy[index] = new GameObject(GO.objects[index].name).transform;
+            transformsHiererchy[index] = new GameObject(templets.objects[index].name).transform;
             transformsHiererchy[index].parent = parent;
             SetData(index);
             
             Debug.Log(transformsHiererchy[index].name);
-            if(GO.objects[index].childCount != 0)
+            if(templets.objects[index].childCount != 0)
             {
-                InstantiateObjects(GO.objects[index].childCount, transformsHiererchy[index]);
+                InstantiateObjects(templets.objects[index].childCount, transformsHiererchy[index]);
             }
         }
     }
 
     private void SetData(int index)
     {
-        transformsHiererchy[index].localPosition = GO.objects[index].data.position;
-        transformsHiererchy[index].localRotation = GO.objects[index].data.rotation;
-        transformsHiererchy[index].localScale = GO.objects[index].data.scale;
+        transformsHiererchy[index].localPosition = templets.objects[index].data.position;
+        transformsHiererchy[index].localRotation = templets.objects[index].data.rotation;
+        transformsHiererchy[index].localScale = templets.objects[index].data.scale;
     }
 
     public void ApplyChanges()
     {
         int index = 0;
-        foreach (var obj in GO.objects)
+        foreach (var obj in templets.objects)
         {
             transformsHiererchy[index].localPosition = obj.data.position;
             transformsHiererchy[index].localRotation = obj.data.rotation;
@@ -129,7 +121,7 @@ public class HierarchyManager : MonoBehaviour
 
 
 [Serializable]
-public class Objects
+public class ObjectTemplets
 {
     public List<GameObjectInfo> objects = new List<GameObjectInfo>();
 }
