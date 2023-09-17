@@ -6,10 +6,12 @@ using UnityEngine;
 
 public class GameObjectParser : MonoBehaviour
 {
-    private Transform parentObject;
+    public Transform parentObject;
     [HideInInspector] public Objects GO;
     private string saveFile;
     private string json;
+    public string filePath = "/HierarchyData";
+
     void Awake()
     {
         // GO  ;
@@ -22,11 +24,11 @@ public class GameObjectParser : MonoBehaviour
         // ConvertToJSON(GO);
     }
 
-    public void ReadHierarchy()
+    public void ReadHierarchy(Transform parent)
     {
         GO = new Objects();
-        FillData(parentObject);
-        Parse(parentObject);
+        FillData(parent);
+        Parse(parent);
     }
     private void Parse(Transform parent)
     {
@@ -54,22 +56,22 @@ public class GameObjectParser : MonoBehaviour
         GO.objects.Add(myObj);
     }
 
-    public void SaveToJSON(Objects go)
+    public void SaveToJSON(Objects go, string path)
     {
-        saveFile = Application.dataPath + "/HirarchyData.json";
+        saveFile = Application.dataPath + path;
         json = JsonUtility.ToJson(go);
         File.WriteAllText(saveFile, json);
         Debug.Log(json);
     }
     
     int index = 0;
-    [SerializeField] Transform[] transformsHiererchy;
-    public void LoadData()
+    Transform[] transformsHiererchy;
+    public void LoadData(string path)
     {   
         GO = new Objects();
         index = 0;
         
-        string filePath = Application.dataPath + "/HirarchyData.json";
+        string filePath = Application.dataPath + path;
         if(File.Exists(filePath))
         {
             string jsonText = File.ReadAllText(filePath);
@@ -78,6 +80,7 @@ public class GameObjectParser : MonoBehaviour
             Debug.Log(GO.objects.Count);
             Debug.Log(transformsHiererchy.Length);
             transformsHiererchy[index] = parentObject = new GameObject(GO.objects[0].name).transform;
+            SetData(index);
             Debug.Log(index);
             InstantiateObjects(GO.objects[index].childCount, transformsHiererchy[index]);
         }
@@ -94,12 +97,21 @@ public class GameObjectParser : MonoBehaviour
             index++;
             transformsHiererchy[index] = new GameObject(GO.objects[index].name).transform;
             transformsHiererchy[index].parent = parent;
+            SetData(index);
+            
             Debug.Log(transformsHiererchy[index].name);
             if(GO.objects[index].childCount != 0)
             {
                 InstantiateObjects(GO.objects[index].childCount, transformsHiererchy[index]);
             }
         }
+    }
+
+    private void SetData(int index)
+    {
+        transformsHiererchy[index].localPosition = GO.objects[index].data.position;
+        transformsHiererchy[index].localRotation = GO.objects[index].data.rotation;
+        transformsHiererchy[index].localScale = GO.objects[index].data.scale;
     }
 
     public void ApplyChanges()
