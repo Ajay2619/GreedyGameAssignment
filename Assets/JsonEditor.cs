@@ -6,12 +6,12 @@ public class JsonEditor : Editor
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-        var gameObjectParser = target as HierarchyManager;
+        var hierarchyManager = target as HierarchyManager;
         
         GUILayout.Space(20);
             if(GUILayout.Button(new GUIContent("LOAD", "make sure the file path is correct to LOAD and GENERATE hierarchy from the file")))
             {
-                gameObjectParser.LoadData(gameObjectParser.filePath);
+                hierarchyManager.LoadData(hierarchyManager.filePath);
             }
 
         GUILayout.Space(10);
@@ -22,12 +22,12 @@ public class JsonEditor : Editor
         
             if(GUILayout.Button(new GUIContent("READ FROM HIERARCHY", "Make sure to link the parent object of the hierarchy to \"Parent Object\" field of which you want to generate JSON \n\nYou can read the changes made in the \n SCENE and apply them to the objects \n\n Press save once the changes are confirmed to create JSON file ")))
             {
-                gameObjectParser.ReadHierarchy(gameObjectParser.parentObject);
+                hierarchyManager.ReadHierarchy(hierarchyManager.parentObject);
             }
 
             if(GUILayout.Button(new GUIContent("READ FROM INSPECTOR", "You can read the changes made in the \n INSPECTOR and apply them to the objects \n\nPress save once the changes are confirmed to create JSON file " )))
             {
-                gameObjectParser.ApplyChanges();
+                hierarchyManager.ApplyChanges();
             }
             
         GUILayout.EndHorizontal();
@@ -39,7 +39,7 @@ public class JsonEditor : Editor
             
             if(GUILayout.Button(new GUIContent("SAVE", "Save to generate JSON file once you read the changes with the aboce buttons")))
             {
-                gameObjectParser.SaveToJSON(gameObjectParser.GO, gameObjectParser.filePath);
+                hierarchyManager.SaveToJSON(hierarchyManager.templets, hierarchyManager.filePath);
             }
 
         GUILayout.Space(10);
@@ -47,7 +47,7 @@ public class JsonEditor : Editor
 
         GUILayout.Space(20);
 
-        foreach(var obj in gameObjectParser.GO.objects)
+        foreach(var obj in hierarchyManager.templets.objects)
         {
             GUILayout.Space(10);
             EditorGUIUtility.labelWidth = 60;
