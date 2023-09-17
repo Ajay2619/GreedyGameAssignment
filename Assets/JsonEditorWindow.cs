@@ -7,6 +7,7 @@ public class JsonEditorWindow : Editor
     {
         base.OnInspectorGUI();
         var gameObjectParser = target as GameObjectParser;
+        Vector4 q;
         
         GUILayout.Space(20);
 
@@ -14,8 +15,11 @@ public class JsonEditorWindow : Editor
         {
             GUILayout.Space(10);
             GUILayout.Label(obj.name);
+            q = new Vector4(obj.data.rotation.x, obj.data.rotation.y, obj.data.rotation.z, obj.data.rotation.w);
+
             obj.data.position = EditorGUILayout.Vector3Field("Position", obj.data.position);
-            obj.data.rotation = EditorGUILayout.Vector3Field("Rotation", obj.data.rotation);
+            q = EditorGUILayout.Vector4Field("Rotation", q);
+            obj.data.rotation = new Quaternion(q.w, q.x, q.y, q.z);
             obj.data.scale = EditorGUILayout.Vector3Field("Scale", obj.data.scale);
         }
 
@@ -23,15 +27,13 @@ public class JsonEditorWindow : Editor
 
             if(GUILayout.Button("SAVE"))
             {
-                //apply changes to game objects
-                gameObjectParser.ConvertToJSON(gameObjectParser.GO);
-                Debug.Log("SAVED");
+                gameObjectParser.ApplyChanges();
+                gameObjectParser.ReadHierarchy();
+                gameObjectParser.SaveToJSON(gameObjectParser.GO);
             }
             if(GUILayout.Button("LOAD"))
             {
-                gameObjectParser.GO = new Objects();
-                gameObjectParser.Parse(gameObjectParser.parentObject);
-                Debug.Log("LOADED");
+                gameObjectParser.LoadData();
             }
             
         GUILayout.EndHorizontal();
