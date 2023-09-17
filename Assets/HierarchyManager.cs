@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-public class GameObjectParser : MonoBehaviour
+public class HierarchyManager : MonoBehaviour
 {
     public Transform parentObject;
     [HideInInspector] public Objects GO;
